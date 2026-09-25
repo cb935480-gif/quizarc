@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="QuizArc — Timed trivia challenge with daily quests, XP progression, streaks, and global leaderboards." />
+<title>QuizArc — Interactive Quiz &amp; Daily Challenge</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand" id="brandBtn"><div class="brand-mark">⚡</div>QuizArc</div>
+    <div class="header-actions">
+      <div class="header-user-chip" id="headerUserChip" style="display:none;">
+        <span class="user-lvl" id="headerLvl">Lv. 1</span>
+        <span class="user-xp" id="headerXp">⚡ 0 XP</span>
+        <span class="streak-pill" id="headerStreak">🔥 0</span>
+      </div>
+      <button class="icon-btn" id="headerLbBtn" title="Leaderboard">🏆 Leaderboard</button>
+      <button class="icon-btn auth-btn" id="headerAuthBtn">🔐 Login</button>
+    </div>
+  </header>
+
+  <!-- LOADING -->
+  <section class="screen" id="screen-loading">
+    <div class="loading-wrap">
+      <div class="spinner"></div>
+      <p class="loading-text" id="loadingText">Loading QuizArc…</p>
+    </div>
+  </section>
+
+  <!-- ERROR -->
+  <section class="screen" id="screen-error">
+    <div class="error-wrap">
+      <div class="error-icon">⚠️</div>
+      <p class="error-text" id="errorText">Something went wrong.</p>
+      <button class="btn-primary" id="retryLoadBtn" style="max-width:240px;margin:0 auto;">Retry</button>
+    </div>
+  </section>
+
+  <!-- LOGIN / REGISTER -->
+  <section class="screen" id="screen-login">
+    <div class="auth-container">
+      <div class="auth-hero">
+        <h1 class="auth-title">Welcome to QuizArc</h1>
+        <p class="auth-sub">Log in or register your account to start playing daily challenges, earning XP, building streaks, and climbing the leaderboard.</p>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tabLoginBtn" data-tab="login">Login</button>
+          <button class="auth-tab" id="tabRegBtn" data-tab="register">Register</button>
+        </div>
+
+        <!-- Login Form -->
+        <form class="auth-form" id="loginForm" onsubmit="return false;">
+          <input type="text" class="modal-input" id="loginUsername" placeholder="Username" maxlength="30" autocomplete="username" required />
+          <input type="password" class="modal-input" id="loginPin" placeholder="PIN (4–10 digits)" maxlength="10" inputmode="numeric" required />
+          <p class="auth-error" id="loginError"></p>
+          <button class="btn-primary" id="loginSubmitBtn">Sign In →</button>
+        </form>
+
+        <!-- Register Form -->
+        <form class="auth-form" id="regForm" style="display:none;" onsubmit="return false;">
+          <input type="text" class="modal-input" id="regUsername" placeholder="Choose Username (2–30 chars)" maxlength="30" autocomplete="username" required />
+          <input type="password" class="modal-input" id="regPin" placeholder="Create Secret PIN (4–10 digits)" maxlength="10" inputmode="numeric" required />
+          <p class="auth-error" id="regError"></p>
+          <button class="btn-primary" id="regSubmitBtn">Create Account &amp; Play →</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD (Balanced 2-column Desktop Layout) -->
+  <section class="screen" id="screen-dashboard">
+    <div class="dash-layout">
+      <!-- Main Content (Left Column on Desktop) -->
+      <div class="dash-main">
+        <div class="section-title">Select Mode</div>
+
+        <!-- Daily Challenge Card -->
+        <div class="daily-card" id="dailyCard">
+          <div class="daily-badge">🌟 Daily Challenge</div>
+          <h3 class="daily-title">Today's Mixed Challenge</h3>
+          <p class="daily-desc">10 questions picked at random across all categories. Earn <strong>+50% Bonus XP</strong>!</p>
+          <div class="daily-status-row">
+            <span class="daily-bonus-pill">+50% XP Bonus</span>
+            <button class="btn-daily" id="startDailyBtn">⚡ Play Daily Challenge</button>
+          </div>
+        </div>
+
+        <!-- Practice Mode Selection Box -->
+        <div class="practice-box">
+          <h3 class="practice-title">🎯 Practice Mode</h3>
+          <p class="practice-desc">Choose a category and difficulty level to test your knowledge.</p>
+
+          <div class="cat-grid" id="catGrid"></div>
+
+          <div class="diff-row" id="diffRow">
+            <button class="diff-btn" data-d="easy"><span class="check-icon">✓</span> Easy · 25s</button>
+            <button class="diff-btn selected" data-d="medium"><span class="check-icon">✓</span> Medium · 20s</button>
+            <button class="diff-btn" data-d="hard"><span class="check-icon">✓</span> Hard · 12s</button>
+          </div>
+
+          <button class="btn-primary" id="startPracticeBtn" disabled>Select a category to start practice</button>
+        </div>
+      </div>
+
+      <!-- Sidebar / Progress Panel (Right Column on Desktop) -->
+      <div class="dash-sidebar">
+        <!-- User Profile Card -->
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar" id="dashAvatar">⚡</div>
+            <div class="profile-info">
+              <div class="profile-name-row">
+                <h2 class="profile-name" id="dashUsername">Player</h2>
+                <span class="lvl-badge" id="dashLvlBadge">Lv. 1</span>
+              </div>
+              <div class="xp-bar-wrap">
+                <div class="xp-bar-track"><div class="xp-bar-fill" id="dashXpFill" style="width:0%;"></div></div>
+                <span class="xp-bar-text" id="dashXpText">0 / 100 XP</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dash-stats-row">
+            <div class="dash-stat-item">
+              <div class="stat-icon">⚡</div>
+              <div class="stat-val" id="dashTotalXp">0</div>
+              <div class="stat-lbl">Total XP</div>
+            </div>
+            <div class="dash-stat-item">
+              <div class="stat-icon">🔥</div>
+              <div class="stat-val" id="dashStreak">0</div>
+              <div class="stat-lbl">Current Streak</div>
+            </div>
+            <div class="dash-stat-item">
+              <div class="stat-icon">🏆</div>
+              <div class="stat-val" id="dashBestStreak">0</div>
+              <div class="stat-lbl">Best Streak</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rank & Quizzes Summary Card -->
+        <div class="side-card">
+          <div class="side-card-title">📊 Global Rank &amp; Quizzes</div>
+          <div class="rank-stats-grid">
+            <div class="rank-box">
+              <div class="rank-val" id="dashGlobalRank">#1</div>
+              <div class="rank-lbl">Global Rank</div>
+            </div>
+            <div class="rank-box">
+              <div class="rank-val" id="dashQuizzesPlayed">0</div>
+              <div class="rank-lbl">Quizzes Played</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity Card -->
+        <div class="side-card">
+          <div class="side-card-title">🕒 Recent Activity</div>
+          <div class="recent-list" id="recentActivityList">
+            <p class="empty-text">No recent quizzes played yet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ SCREEN -->
+  <section class="screen" id="screen-quiz">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    
+    <div class="quiz-topline">
+      <span id="qCounter">Question 1 of 10</span>
+      <div class="quiz-stats-pill">
+        <span id="liveXpPill">✨ +0 XP</span>
+        <span id="liveStreakPill">🔥 0 streak</span>
+      </div>
+      <div class="timer-wrap">
+        <span id="timerNum">20s</span>
+        <div class="timer-bar-track"><div class="timer-bar-fill" id="timerFill"></div></div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-eyebrow" id="qCategory">General Knowledge</div>
+      <div class="q-text" id="qText">Question text goes here</div>
+    </div>
+
+    <div class="options" id="optionsWrap"></div>
+    <div class="feedback-line" id="feedbackLine"></div>
+    <div class="next-row"><button class="btn-next" id="nextBtn">Next question →</button></div>
+  </section>
+
+  <!-- RESULT SCREEN -->
+  <section class="screen" id="screen-results">
+    <div class="result-card">
+      <div class="level-up-banner" id="levelUpBanner" style="display:none;">
+        <span class="level-up-icon">🎉</span>
+        <div>
+          <div class="level-up-title">LEVEL UP!</div>
+          <div class="level-up-sub" id="levelUpText">You reached Level 2!</div>
+        </div>
+      </div>
+
+      <div class="result-score-wrap">
+        <div class="score-ring">
+          <svg viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#7c5cff"/>
+                <stop offset="100%" stop-color="#4fd6c4"/>
+              </linearGradient>
+            </defs>
+            <circle class="bg" cx="60" cy="60" r="52"/>
+            <circle class="fg" id="ringFg" cx="60" cy="60" r="52" stroke-dasharray="327" stroke-dashoffset="327"/>
+          </svg>
+          <div class="score-center">
+            <div class="score-num" id="scoreNum">0/10</div>
+            <div class="score-label">correct</div>
+          </div>
+        </div>
+
+        <div class="result-tag" id="resultTag">Great Job!</div>
+        <div class="result-sub" id="resultSub">You completed the quiz!</div>
+      </div>
+
+      <!-- 4 Metrics Grid: Score/Accuracy, XP, Streak, Avg Speed -->
+      <div class="rewards-grid">
+        <div class="reward-box">
+          <div class="reward-icon">✨</div>
+          <div class="reward-val" id="resXpEarned">+0 XP</div>
+          <div class="reward-lbl" id="resXpBreakdown">Base XP</div>
+        </div>
+        <div class="reward-box">
+          <div class="reward-icon">🎯</div>
+          <div class="reward-val" id="resAccuracyVal">0%</div>
+          <div class="reward-lbl">Accuracy</div>
+        </div>
+        <div class="reward-box">
+          <div class="reward-icon">🔥</div>
+          <div class="reward-val" id="resStreakVal">0 Days</div>
+          <div class="reward-lbl">Active Streak</div>
+        </div>
+        <div class="reward-box">
+          <div class="reward-icon">⏱</div>
+          <div class="reward-val" id="resAvgTimeVal">0s / Q</div>
+          <div class="reward-lbl">Avg Speed</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons with Clear CTA Hierarchy -->
+      <div class="result-actions">
+        <button class="btn-primary" id="reviewAnswersBtn">📖 Review Answers</button>
+        <button class="btn-secondary" id="resLbBtn">🏆 Leaderboard</button>
+        <button class="btn-secondary" id="dashReturnBtn">🏠 Dashboard</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW SCREEN -->
+  <section class="screen" id="screen-review">
+    <div class="review-header">
+      <h2 class="review-title">📖 Quiz Review</h2>
+      <p class="hero-sub" id="reviewSub">Check all your answers below.</p>
+    </div>
+
+    <div class="review-list" id="reviewList"></div>
+
+    <button class="btn-primary" id="reviewBackBtn" style="margin-top:24px;">← Back to Dashboard</button>
+  </section>
+
+  <!-- LEADERBOARD SCREEN -->
+  <section class="screen" id="screen-leaderboard">
+    <div class="hero-line" style="font-size:1.6rem;margin-bottom:6px;">🏆 Leaderboard</div>
+    <p class="hero-sub" style="margin-bottom:20px;">Compete with players worldwide for top XP rankings and category scores.</p>
+
+    <div class="lb-tabs">
+      <button class="lb-tab active" id="lbTabXp" data-type="xp">⚡ XP Leaderboard</button>
+      <button class="lb-tab" id="lbTabCat" data-type="category">🎯 Category High Scores</button>
+    </div>
+
+    <div class="lb-cat-row" id="lbCatRow" style="display:none;"></div>
+
+    <div class="lb-table-wrap" id="lbTableWrap">
+      <div class="spinner" style="margin:40px auto;"></div>
+    </div>
+
+    <button class="btn-primary" id="lbBackBtn" style="margin-top:24px;">← Back to Dashboard</button>
+  </section>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

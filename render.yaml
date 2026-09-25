@@ -8,7 +8,4 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-    disk:
-      name: quizarc-db
-      mountPath: /data
-      sizeGB: 1
+        
